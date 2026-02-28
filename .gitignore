@@ -1,0 +1,28 @@
+# Binaries
+bin/
+copilot-proxy
+proxy
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Config (contains auth tokens)
+.claude_copilot_proxy.json
