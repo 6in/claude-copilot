@@ -137,6 +137,7 @@ make build-darwin
 |--------|------|-----------|
 | `-port` | 待受ポート番号（環境変数より優先） | `8080` |
 | `-logoff` | 認証情報（`~/.claude_copilot_proxy.json`）を削除してログアウト | - |
+| `-debug` | ターミナルにClaude Codeから送られてくる生プロンプト(JSON)を出力する | `false` |
 
 ログアウト例:
 ```bash
