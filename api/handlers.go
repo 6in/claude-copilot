@@ -15,6 +15,7 @@ import (
 // Handler wraps the copilot SDK client and provides HTTP endpoints
 type Handler struct {
 	CopilotClient *copilot.Client
+	Debug         bool
 }
 
 // HandleMessages processes POST /v1/messages requests from Claude Code
@@ -29,6 +30,13 @@ func (h *Handler) HandleMessages(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&anthropicReq); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to decode request: %v", err), http.StatusBadRequest)
 		return
+	}
+
+	if h.Debug {
+		log.Println("=== [DEBUG] Incoming Anthropic Request ===")
+		reqJSON, _ := json.MarshalIndent(anthropicReq, "", "  ")
+		fmt.Println(string(reqJSON))
+		log.Println("==========================================")
 	}
 
 	// 2. Translate and execute via Copilot SDK

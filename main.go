@@ -19,6 +19,7 @@ func main() {
 	// CLI arguments
 	port := flag.Int("port", 0, "ポート番号 (デフォルト: 8080、環境変数 PROXY_PORT でも指定可)")
 	logoff := flag.Bool("logoff", false, "認証情報を削除してログアウト")
+	debug := flag.Bool("debug", false, "詳細なデバッグログ（プロンプトの中身など）を出力する")
 	flag.Parse()
 
 	// Handle -logoff
@@ -80,7 +81,10 @@ func main() {
 	}
 
 	// 5. Setup HTTP API Handlers
-	handler := &api.Handler{CopilotClient: client}
+	handler := &api.Handler{
+		CopilotClient: client,
+		Debug:         *debug,
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/messages", handler.HandleMessages)
