@@ -117,7 +117,7 @@ claude --model "GPT-5 mini" -p "Pythonでフィボナッチ数列を出力して
 
 <!-- 📸 スクリーンショット: ワンショット実行の結果 -->
 
-<img src="./images/step2.png" style="width: 800px">
+<img src="./images/step3.png" style="width: 800px">
 
 `-p` オプションでのワンライナー実行もバッチリ。  
 返ってきたコードもちゃんと動く、実用レベルのクオリティでした 🎉
