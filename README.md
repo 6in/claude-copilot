@@ -85,22 +85,31 @@ export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
 ### Claude Code から利用
 
 ```bash
-ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 claude --model "GPT-5 mini"
+ANTHROPIC_AUTH_TOKEN=dummy \
+ANTHROPIC_BASE_URL=http://localhost:8080 \
+CLAUDE_CONFIG_DIR=~/.claude_copilot \
+claude --model "GPT-5 mini"
 ```
 
 ### ワンショット実行
 
 ```bash
-ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 \
-  claude --model "GPT-5 mini" -p "Pythonでhello worldを書いて"
+ANTHROPIC_AUTH_TOKEN=dummy \
+ANTHROPIC_BASE_URL=http://localhost:8080 \
+CLAUDE_CONFIG_DIR=~/.claude_copilot \
+claude --model "GPT-5 mini" -p "Pythonでhello worldを書いて"
 ```
 
 ### エイリアス設定（推奨）
 
 ```bash
 # ~/.zshrc に追加
-alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 claude --model "GPT-5 mini"'
+alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 CLAUDE_CONFIG_DIR=~/.claude_copilot claude --model "GPT-5 mini"'
 ```
+
+### 💡 CLAUDE_CONFIG_DIR について（推奨）
+このプロキシ経由で利用する際には、起動時の引数で `CLAUDE_CONFIG_DIR=~/.claude_copilot` を指定することを推奨しています。
+Claude Code は通常 `~/.claude/` に様々なデータ（`settings.json` や過去のチャットログ、グローバルインストールされたスキル等）を保持します。環境変数を指定することで、公式の Claude API 用の環境と完全に分離されたサンドボックス化されたプロファイルが自動生成されます。これにより、公式環境用の不要なロードを省き、エラーやコンフリクトを未然に防ぎます。
 
 ## クロスプラットフォームビルド
 

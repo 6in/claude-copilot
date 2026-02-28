@@ -87,7 +87,10 @@ make build-all
 ### Step 3: Claude Code で接続 ⚡
 
 ```bash
-ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL="http://localhost:8080" claude --model "GPT-5 mini"
+ANTHROPIC_AUTH_TOKEN=dummy \
+ANTHROPIC_BASE_URL="http://localhost:8080" \
+CLAUDE_CONFIG_DIR=~/.claude_copilot \
+claude --model "GPT-5 mini"
 ```
 
 たったこれだけ。
@@ -106,8 +109,10 @@ ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL="http://localhost:8080" claude --m
 ### Step 4: ワンショット実行もOK 🎯
 
 ```bash
-ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL="http://localhost:8080" \
-  claude --model "GPT-5 mini" -p "Pythonでフィボナッチ数列を出力して"
+ANTHROPIC_AUTH_TOKEN=dummy \
+ANTHROPIC_BASE_URL="http://localhost:8080" \
+CLAUDE_CONFIG_DIR=~/.claude_copilot \
+claude --model "GPT-5 mini" -p "Pythonでフィボナッチ数列を出力して"
 ```
 
 <!-- 📸 スクリーンショット: ワンショット実行の結果 -->
@@ -150,10 +155,17 @@ HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/claude-copilot
 
 ```bash
 # ~/.zshrc に追加
-alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 claude --model "GPT-5 mini"'
+alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 CLAUDE_CONFIG_DIR=~/.claude_copilot claude --model "GPT-5 mini"'
 ```
 
 これで `claude-copilot` と打つだけで起動！
+
+### 🤔 なぜ CLAUDE_CONFIG_DIR を指定するの？
+ここが地味に大事なポイントです。コマンド例の中で `CLAUDE_CONFIG_DIR=~/.claude_copilot` という環境変数を指定しています。
+
+これは **「Claude Code の設定フォルダ（履歴やインストール済みスキルなどを保存する場所）を、通常の Claude とは別の場所に分離する」** という設定です。
+こうすることで、公式の Claude 向けのグローバル設定や重いスキルなどが読み込まれるのを防ぎ、エラーやコンフリクトを回避してピュアで軽量な環境を保つことができます。
+（※フォルダは無くても初回起動時に自動作成されるので、自分で `mkdir` する必要はありません！）
 
 
 ## 🤔 これって大丈夫なの？

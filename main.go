@@ -106,7 +106,10 @@ func main() {
 
 	fmt.Printf("🚀 Server is running on http://localhost%s\n", addr)
 	fmt.Printf("Configure Claude Code:\n")
-	fmt.Printf("    ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=\"http://localhost%s\" claude --model \"GPT-5 mini\"\n", addr)
+	fmt.Printf("    ANTHROPIC_AUTH_TOKEN=dummy \\\n")
+	fmt.Printf("    ANTHROPIC_BASE_URL=\"http://localhost%s\" \\\n", addr)
+	fmt.Printf("    CLAUDE_CONFIG_DIR=~/.claude_copilot \\\n")
+	fmt.Printf("    claude --model \"GPT-5 mini\"\n")
 
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Printf("Server failed: %v\n", err)
