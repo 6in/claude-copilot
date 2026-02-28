@@ -17,7 +17,7 @@ Claude Code は `ANTHROPIC_BASE_URL` を差し替えることで、Anthropic以�
 
 💡 **「……ということは、Ollama の代わりに Copilot を繋げばいいのでは？」**
 
-そう思って作ったのが、今回紹介する **`copilot-proxy`** です。  
+そう思って作ったのが、今回紹介する **`claude-copilot`** です。  
 **しかも、すんなり動いてしまって自分でもびっくりしました** 😳
 
 ## 🛠️ 何を作ったの？
@@ -25,7 +25,7 @@ Claude Code は `ANTHROPIC_BASE_URL` を差し替えることで、Anthropic以�
 ひとことで言うと、**Claude Code と GitHub Copilot の間に立つ翻訳プロキシサーバー**です。
 
 ```
-Claude Code  →  copilot-proxy（Go製）  →  GitHub Copilot SDK
+Claude Code  →  claude-copilot（Go製）  →  GitHub Copilot SDK
    ↑                                           ↓
    └──────── Anthropic SSE形式で返却 ←──────────┘
 ```
@@ -46,9 +46,19 @@ Claude Code は「Anthropicの `/v1/messages` API」を叩いている**つも�
 
 ### Step 1: ビルド 🔨
 
+まず前提として、**GitHub Copilot CLI** が必要です。  
+Copilot SDK は内部で Copilot CLI を子プロセスとして呼び出すため、事前にインストールしておきましょう。
+(copilot-cliの利用は、copilot-businessでの利用許可が必要です)
+
 ```bash
-git clone <repository-url>
-cd copilot-proxy
+npm install -g @github/copilot
+```
+
+あとは clone してビルドするだけ 🔨
+
+```bash
+git clone https://github.com/6in/claude-copilot
+cd claude-copilot
 make build
 ```
 
@@ -64,7 +74,7 @@ make build-all
 ### Step 2: 起動 🚀
 
 ```bash
-./bin/copilot-proxy
+./bin/claude-copilot
 ```
 
 初回起動時には、GitHub への**ログイン認証**（デバイス認証フロー）が走ります。
@@ -114,13 +124,13 @@ ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL="http://localhost:8080" \
 会社のネットワークプロキシ配下でも使えるように、`HTTPS_PROXY`（認証情報付き）に対応しています。
 
 ```bash
-HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/copilot-proxy
+HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/claude-copilot
 ```
 
 ### ポート番号の指定 🔌
 
 ```bash
-./bin/copilot-proxy -port 3000
+./bin/claude-copilot -port 3000
 ```
 
 デフォルトは `8080` ですが、`-port` フラグで好きなポートに変更できます。
@@ -130,7 +140,7 @@ HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/copilot-proxy
 トークンをリセットしたくなったら：
 
 ```bash
-./bin/copilot-proxy -logoff
+./bin/claude-copilot -logoff
 # ✅ 認証情報を削除しました
 ```
 
@@ -181,5 +191,13 @@ Copilotのサブスクリプションを持っている方は、ぜひ試して�
 
 ---
 
-*この記事で紹介した `copilot-proxy` のソースコードは GitHub で公開しています。*  
+*この記事で紹介した `claude-copilot` のソースコードは [GitHubリポジトリ](https://github.com/6in/claude-copilot) で公開しています。*  
 *スター ⭐ いただけると励みになります！*
+
+---
+
+## おまけ
+
+素直に、github copilot cli を使えばいいという話もあります。
+まあ、ロマン枠ですね。
+でも、今流行りのアレ(🦀)からは呼び出せそうな雰囲気はあります。

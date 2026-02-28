@@ -1,4 +1,4 @@
-module copilot-proxy
+module claude-copilot
 
 go 1.24
 

@@ -1,4 +1,4 @@
-# copilot-proxy
+# claude-copilot
 
 GitHub Copilot をバックエンドに、Claude Code (Anthropic Messages API) を透過的に利用するためのローカルプロキシサーバーです。  
 公式 [GitHub Copilot SDK for Go](https://github.com/github/copilot-sdk/go) を使用しています。
@@ -12,7 +12,7 @@ GitHub Copilot をバックエンドに、Claude Code (Anthropic Messages API) �
 
 ```
 ┌──────────────┐      Anthropic API        ┌─────────────────┐      Copilot SDK       ┌──────────────────┐
-│  Claude Code │  ──── POST /v1/messages ──▶│  copilot-proxy  │  ──── Session.Send ──▶ │  GitHub Copilot  │
+│  Claude Code │  ──── POST /v1/messages ──▶│  claude-copilot  │  ──── Session.Send ──▶ │  GitHub Copilot  │
 │  (CLI)       │  ◀── SSE Stream ──────────│  localhost:8080  │  ◀── SessionEvent ──── │  (GPT-5 mini等)  │
 └──────────────┘                           └─────────────────┘                        └──────────────────┘
 ```
@@ -21,12 +21,13 @@ GitHub Copilot をバックエンドに、Claude Code (Anthropic Messages API) �
 
 - Go 1.24+
 - GitHub アカウント（Copilot サブスクリプション付き）
-- `gh auth login` 済み、または初回起動時にデバイス認証を実施
+- **GitHub Copilot CLI** (インストールは[こちら](https://github.com/features/copilot/cli?locale=ja))
+  - Copilot SDK は内部で Copilot CLI を子プロセスとして起動するため必須です
 
 ## セットアップ
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/6in/claude-copilot
 cd claude-copilot
 make build
 ```
@@ -37,10 +38,10 @@ make build
 
 ```bash
 # デフォルトポート (8080)
-./bin/copilot-proxy
+./bin/claude-copilot
 
 # ポート指定
-./bin/copilot-proxy -port 3000
+./bin/claude-copilot -port 3000
 ```
 
 ### 初回起動時のデバイス認証
@@ -76,7 +77,7 @@ make build
 
 ```bash
 export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
-./bin/copilot-proxy
+./bin/claude-copilot
 ```
 
 起動時にプロキシ設定が検出されるとログに表示されます。
@@ -130,7 +131,7 @@ make build-darwin
 
 ログアウト例:
 ```bash
-./bin/copilot-proxy -logoff
+./bin/claude-copilot -logoff
 # → ✅ 認証情報を削除しました: /Users/<user>/.claude_copilot_proxy.json
 ```
 
@@ -150,4 +151,4 @@ make build-darwin
 
 ## ライセンス
 
-MIT
+MIT License (Personal Use Only) — 個人利用・非商用目的に限ります。詳細は [LICENSE](LICENSE) を参照してください。

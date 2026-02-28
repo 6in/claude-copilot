@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"copilot-proxy/models"
+	"claude-copilot/models"
 
 	copilot "github.com/github/copilot-sdk/go"
 )

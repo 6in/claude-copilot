@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"copilot-proxy/models"
-	"copilot-proxy/translator"
+	"claude-copilot/models"
+	"claude-copilot/translator"
 
 	copilot "github.com/github/copilot-sdk/go"
 )

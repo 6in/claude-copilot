@@ -10,9 +10,9 @@ import (
 
 	copilot "github.com/github/copilot-sdk/go"
 
-	"copilot-proxy/api"
-	"copilot-proxy/auth"
-	"copilot-proxy/config"
+	"claude-copilot/api"
+	"claude-copilot/auth"
+	"claude-copilot/config"
 )
 
 func main() {

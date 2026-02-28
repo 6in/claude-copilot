@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"copilot-proxy/config"
+	"claude-copilot/config"
 )
 
 const (
