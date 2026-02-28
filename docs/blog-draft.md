@@ -110,7 +110,7 @@ claude --model "GPT-5 mini"
 
 ```bash
 ANTHROPIC_AUTH_TOKEN=dummy \
-ANTHROPIC_BASE_URL="http://localhost:8080" \
+ANTHROPIC_BASE_URL="http://localhost:8081" \
 CLAUDE_CONFIG_DIR=~/.claude_copilot \
 claude --model "GPT-5 mini" -p "Pythonでフィボナッチ数列を出力して"
 ```
