@@ -22,6 +22,7 @@ func HandleChatRequest(ctx context.Context, copilotClient *copilot.Client, anthr
 	session, err := copilotClient.CreateSession(ctx, &copilot.SessionConfig{
 		Model:               modelName,
 		OnPermissionRequest: copilot.PermissionHandler.ApproveAll,
+		Streaming:           anthropicReq.Stream,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create copilot session: %w", err)
@@ -174,17 +175,15 @@ func handleStream(session *copilot.Session, prompt string, w http.ResponseWriter
 	unsubscribe := session.On(func(event copilot.SessionEvent) {
 		switch event.Type {
 		// Event: Assistant is streaming text back
-		// In the current SDK, assistant.message typically emits when a message starts/stops,
-		// but actual streaming data might be handled differently or batched.
-		// Note: we assume event.Data.Content contains the newly streamed text.
-		case copilot.AssistantMessage:
-			if event.Data.Content != nil && *event.Data.Content != "" {
+		// We subscribe to AssistantMessageDelta to receive chunks progressively instead of waiting for the full AssistantMessage.
+		case copilot.AssistantMessageDelta:
+			if event.Data.DeltaContent != nil && *event.Data.DeltaContent != "" {
 				sendAnthropicEvent(w, flusher, "content_block_delta", models.AnthropicEvent{
 					Type:  "content_block_delta",
 					Index: 0,
 					Delta: &models.AnthropicDelta{
 						Type: "text_delta",
-						Text: *event.Data.Content,
+						Text: *event.Data.DeltaContent,
 					},
 				})
 			}
