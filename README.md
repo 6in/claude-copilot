@@ -21,16 +21,45 @@ GitHub Copilot をバックエンドに、Claude Code (Anthropic Messages API) �
 
 - Go 1.24+
 - GitHub アカウント（Copilot サブスクリプション付き）
-- **GitHub Copilot CLI** (インストールは[こちら](https://github.com/features/copilot/cli?locale=ja))
-  - Copilot SDK は内部で Copilot CLI を子プロセスとして起動するため必須です
+
+Copilot CLI は **SDK埋め込み方式（推奨）** で導入できます（下記参照）。
 
 ## セットアップ
+
+### 👨‍💻 開発チーム向け（ビルドして配布する側）
 
 ```bash
 git clone https://github.com/6in/claude-copilot
 cd claude-copilot
+
+# Copilot CLIを埋め込み生成（初回のみ）
+make bundler
+
+# ビルド
 make build
 ```
+
+生成されるファイル例（darwin/arm64）：
+
+- `zcopilot_0.0.420_darwin_arm64.zst`
+- `zcopilot_0.0.420_darwin_arm64.license`
+- `zcopilot_darwin_arm64.go`
+
+`-copilot-cli` / `COPILOT_CLI_PATH` を指定しない場合、アプリはこの埋め込みCLIを優先して利用します。
+
+**完成したバイナリ（`./bin/claude-copilot`）を会社内で配布します。**
+
+### 👥 エンドユーザー向け（配布されたバイナリを使う側）
+
+配布されたバイナリを受け取ったら、**ビルドは不要です**。そのまま実行できます：
+
+```bash
+# 配布されたバイナリを実行（認証情報付きプロキシ経由）
+export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
+./bin/claude-copilot -insecure
+```
+
+これで完成です。バイナリさえあれば、Go の環境やビルドツール一切不要です。
 
 ## 使い方
 
@@ -38,10 +67,10 @@ make build
 
 ```bash
 # デフォルトポート (8080)
-./bin/claude-copilot
+./bin/claude-copilot -insecure
 
 # ポート指定
-./bin/claude-copilot -port 3000
+./bin/claude-copilot -insecure -port 3000
 ```
 
 ### 初回起動時のデバイス認証
@@ -77,10 +106,46 @@ make build
 
 ```bash
 export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
-./bin/claude-copilot
+./bin/claude-copilot -insecure
 ```
 
 起動時にプロキシ設定が検出されるとログに表示されます。
+
+#### 推奨方法: CA証明書を指定
+
+企業プロキシがSSLインターセプトを行う場合、以下の方法が安全です。
+
+```bash
+# 1. 企業CA証明書を取得（IT部門に確認）
+# 例: /etc/ssl/certs/company-ca.pem
+
+# 2. プロキシ経由で起動（認証情報は環境変数で）
+export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
+./bin/claude-copilot -ca-cert /etc/ssl/certs/company-ca.pem
+```
+
+#### 簡易方法: TLS検証をスキップ（一時的な対応）
+
+証明書問題で動作しない場合の緊急対応：
+
+```bash
+export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
+./bin/claude-copilot -insecure
+```
+
+⚠️ `-insecure` は中間者攻撃に対する脆弱性があります。必要に応じて `-ca-cert` への移行をお勧めします。
+
+#### Node.js実行時の最適化
+
+プロキシ環境でNode.jsの挙動を調整する場合：
+
+```bash
+# Node.js直下のディレクトリをPATHに追加
+./bin/claude-copilot -insecure -node-bin /opt/homebrew/opt/node/bin
+
+# Node.js実行時オプションを追加（詳細ログなど）
+./bin/claude-copilot -insecure -node-options "--trace-warnings"
+```
 
 ### Claude Code から利用
 
@@ -138,6 +203,9 @@ make build-darwin
 | `-port` | 待受ポート番号（環境変数より優先） | `8080` |
 | `-logoff` | 認証情報（`~/.claude_copilot_proxy.json`）を削除してログアウト | - |
 | `-debug` | ターミナルにClaude Codeから送られてくる生プロンプト(JSON)を出力する | `false` |
+| `-insecure` | TLS証明書検証を無効化（企業プロキシ環境向け） | `false` |
+| `-ca-cert` | 追加のCA証明書ファイルを指定（`NODE_EXTRA_CA_CERTS`） | - |
+| `-copilot-cli` | Copilot CLIパスを明示指定（通常は不要） | - |
 
 ログアウト例:
 ```bash

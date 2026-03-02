@@ -4,10 +4,16 @@ BIN_DIR  := bin
 VERSION  := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS  := -ldflags "-s -w -X main.version=$(VERSION)"
 
-.PHONY: all build build-all build-linux build-windows build-darwin clean run tidy test
+.PHONY: all build build-all build-linux build-windows build-darwin bundler clean run tidy test
 
 ## デフォルト: 現在のOS向けビルド
 all: build
+
+## Copilot CLI の埋め込み生成（初回のみ必要）
+bundler:
+	go get -tool github.com/github/copilot-sdk/go/cmd/bundler
+	go run github.com/github/copilot-sdk/go/cmd/bundler
+	@echo "Embedded CLI files generated"
 
 ## 現在のOS/Arch向けビルド
 build:

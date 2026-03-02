@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +10,21 @@ import (
 
 	"claude-copilot/config"
 )
+
+// Insecure controls whether TLS certificate verification is skipped
+// for HTTP requests to GitHub (set by --insecure flag)
+var Insecure bool
+
+// newHTTPClient creates an HTTP client that respects the Insecure setting
+func newHTTPClient() *http.Client {
+	client := &http.Client{Timeout: 10 * time.Second}
+	if Insecure {
+		client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+	return client
+}
 
 const (
 	clientID      = "Iv1.b507a08c87ecfe98" // Well-known Client ID for GitHub Copilot
@@ -66,7 +82,7 @@ func EnsureToken(cfg *config.AppConfig) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := newHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to request device code: %w", err)
@@ -115,7 +131,7 @@ func pollForToken(deviceCode string, interval int, expiresIn int) (string, error
 		pollInterval = 5 * time.Second
 	}
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := newHTTPClient()
 
 	for time.Now().Before(deadline) {
 		reqBody, _ := json.Marshal(TokenRequest{

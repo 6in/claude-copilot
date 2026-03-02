@@ -44,23 +44,26 @@ Claude Code は「Anthropicの `/v1/messages` API」を叩いている**つも�
 
 ## 🎬 実際に動かしてみる
 
-### Step 1: ビルド 🔨
+### Step 1: セットアップ 🔨
 
-まず前提として、**GitHub Copilot CLI** が必要です。  
-Copilot SDK は内部で Copilot CLI を子プロセスとして呼び出すため、事前にインストールしておきましょう。
-(copilot-cliの利用は、copilot-businessでの利用許可が必要です)
+#### シナリオA：開発チームがビルドする場合
 
-```bash
-npm install -g @github/copilot
-```
-
-あとは clone してビルドするだけ 🔨
+Copilot SDK が使うCLIを用意して、バイナリを生成します。  
+おすすめは **SDK公式の埋め込み方式** です（CLI互換問題を避けやすい）。
 
 ```bash
 git clone https://github.com/6in/claude-copilot
 cd claude-copilot
+
+# Copilot CLIを埋め込み生成（初回のみ）
+make bundler
+
+# ビルド
 make build
 ```
+
+`go run .../bundler` 実行後は、`zcopilot_*.zst` / `zcopilot_*.license` / `zcopilot_<os>_<arch>.go` が生成されます。  
+`-copilot-cli` を指定しない場合、この埋め込みCLIが使われます。
 
 **Makefileを用意してあるのでコマンド一発** です。  
 しかもクロスコンパイル対応なので、Windows / macOS / Linux 全部いけます。
@@ -69,12 +72,26 @@ make build
 make build-all
 ```
 
+完成したバイナリ（`./bin/claude-copilot`）を会社内で配布します。
+
+#### シナリオB：配布されたバイナリを使う場合
+
+ビルドは **一切不要** です。受け取ったバイナリをそのまま使用できます：
+
+```bash
+# ビルド不要。配布されたバイナリをそのまま実行
+export HTTPS_PROXY="http://user:password@proxy.corp.example.com:8080"
+./bin/claude-copilot -insecure
+```
+
+Go 言語環境やビルドツールがなくても動きます 🎉
+
 <!-- 📸 スクリーンショット: make build-all の実行結果 -->
 
 ### Step 2: 起動 🚀
 
 ```bash
-./bin/claude-copilot
+./bin/claude-copilot -insecure
 ```
 
 初回起動時には、GitHub への**ログイン認証**（デバイス認証フロー）が走ります。
@@ -88,7 +105,7 @@ make build-all
 
 ```bash
 ANTHROPIC_AUTH_TOKEN=dummy \
-ANTHROPIC_BASE_URL="http://localhost:8080" \
+ANTHROPIC_BASE_URL="http://localhost:8081" \
 CLAUDE_CONFIG_DIR=~/.claude_copilot \
 claude --model "GPT-5 mini"
 ```
@@ -128,17 +145,54 @@ claude --model "GPT-5 mini" -p "Pythonでフィボナッチ数列を出力して
 
 会社のネットワークプロキシ配下でも使えるように、`HTTPS_PROXY`（認証情報付き）に対応しています。
 
+#### 簡易方法: -insecure での起動
+
 ```bash
-HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/claude-copilot
+export HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080"
+./bin/claude-copilot -insecure
+```
+
+この方法は TLS 検証をスキップするため、すぐに試せますが、中間者攻撃に対する脆弱性があります。  
+環境によっては、以下の推奨方法への移行をお勧めします。
+
+#### 推奨方法: CA証明書を指定
+
+企業のセキュリティポリシーに従い、CA証明書を使う方法が安全です。
+
+```bash
+# 1. IT部門から企業CA証明書を入手
+# 例: company-ca.pem
+
+# 2. 証明書を指定して起動
+export HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080"
+./bin/claude-copilot -ca-cert /path/to/company-ca.pem
+```
+
+実運用では `-ca-cert` の利用が推奨されています。
+
+#### Node.js 実行時の調整
+
+Node.js の挙動がプロキシと相容れない場合、以下のオプションで対応できます。
+
+```bash
+# Node.js のパスを明示的に指定
+./bin/claude-copilot -insecure -node-bin /opt/homebrew/opt/node/bin
+
+# Node.js 実行時オプション（詳細ログなど）
+./bin/claude-copilot -insecure -node-options "--trace-warnings"
+
+# 複合例
+export HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080"
+./bin/claude-copilot -ca-cert /path/to/ca.pem -node-bin /usr/local/bin
 ```
 
 ### ポート番号の指定 🔌
 
 ```bash
-./bin/claude-copilot -port 3000
+./bin/claude-copilot -insecure -port 3000
 ```
 
-デフォルトは `8080` ですが、`-port` フラグで好きなポートに変更できます。
+デフォルトは `8081` ですが、`-port` フラグで好きなポートに変更できます。
 
 ### ログアウト機能 🚪
 
@@ -164,7 +218,7 @@ HTTPS_PROXY="http://user:pass@proxy.corp.example.com:8080" ./bin/claude-copilot
 
 ```bash
 # ~/.zshrc に追加
-alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8080 CLAUDE_CONFIG_DIR=~/.claude_copilot claude --model "GPT-5 mini"'
+alias claude-copilot='ANTHROPIC_AUTH_TOKEN=dummy ANTHROPIC_BASE_URL=http://localhost:8081 CLAUDE_CONFIG_DIR=~/.claude_copilot claude --model "GPT-5 mini"'
 ```
 
 これで `claude-copilot` と打つだけで起動！
